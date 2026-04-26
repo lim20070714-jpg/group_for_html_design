@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>科育社区 · 书香邻里 | 图书借阅 & 活动室预约</title>
+    <!-- Google Fonts &  Font Awesome 6 (免费图标库) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #fefcf5;
+            color: #2c2b28;
+            line-height: 1.5;
+            padding: 0 0 2rem 0;
+        }
+
+        /* 整体容器 */
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* 头部设计 */
+        .hero-header {
+            background: linear-gradient(135deg, #2b6e4f 0%, #1f5a41 100%);
+            border-radius: 0 0 2rem 2rem;
+            margin-bottom: 2.5rem;
+            padding: 2rem 1.5rem 1.8rem 1.5rem;
+            color: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .hero-header h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .hero-header h1 i {
+            background: #f9c74f;
+            padding: 8px;
+            border-radius: 50%;
+            color: #2b6e4f;
+            font-size: 1.2rem;
+        }
+        .hero-header p {
+            margin-top: 0.6rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        .badge-community {
+            background: #f9c74fd9;
+            display: inline-block;
+            padding: 0.2rem 1rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #1f3e32;
+            margin-top: 12px;
+        }
+
+        /* 双栏网格布局 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 2rem;
+        }
+
+        /* 左侧图书区 */
+        .books-section {
+            background: #ffffff;
+            border-radius: 28px;
+            padding: 1.8rem;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e9e5da;
+        }
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 5px solid #2b6e4f;
+            padding-left: 1rem;
+        }
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        .book-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 1.2rem;
+            transition: all 0.25s ease;
+            border: 1px solid #f0ede3;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+            border-color: #cfd9c7;
+            box-shadow: 0 14px 28px -10px rgba(0,0,0,0.1);
+        }
+        .book-icon {
+            font-size: 2.5rem;
+            color: #2b6e4f;
+            background: #ebf2e9;
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+        }
+        .book-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1f2a1b;
+        }
+        .book-author {
+            font-size: 0.85rem;
+            color: #6b6a64;
+            margin: 4px 0 12px 0;
+        }
+        .book-status {
+            font-size: 0.75rem;
+            background: #e9f7e6;
+            color: #2b6e4f;
+            display: inline-block;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        .btn-borrow {
+            background: #2b6e4f;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            font-size: 0.85rem;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-borrow:hover {
+            background: #1f5a41;
+            transform: scale(0.97);
+        }
+
+        /* 右侧区域 */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        /* 活动室规则+预约表单 */
+        .rules-card, .booking-card, .recent-card {
+            background: white;
+            border-radius: 28px;
+            padding: 1.5rem;
+            border: 1px solid #e9e5da;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+        .rule-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 1rem;
+        }
+        .rule-list {
+            list-style: none;
+            font-size: 0.9rem;
+            color: #43423e;
+            padding-left: 0;
+        }
+        .rule-list li {
+            margin-bottom: 0.7rem;
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+        }
+        .rule-list li i {
+            color: #2b6e4f;
+            width: 20px;
+            font-size: 0.85rem;
+            margin-top: 0.2rem;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        label {
+            font-weight: 500;
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 5px;
+            color: #1f2a1b;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border-radius: 18px;
+            border: 1px solid #ddd8ca;
+            font-family: 'Inter', sans-serif;
+            background: #fefefe;
+            transition: 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2b6e4f;
+            box-shadow: 0 0 0 2px rgba(43,110,79,0.2);
+        }
+        .submit-btn {
+            background: #2b6e4f;
+            color: white;
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .submit-btn:hover {
+            background: #1f5a41;
+        }
+        .recent-list {
+            margin-top: 1rem;
+            max-height: 240px;
+            overflow-y: auto;
+        }
+        .record-item {
+            background: #faf8f2;
+            border-radius: 18px;
+            padding: 0.7rem;
+            margin-bottom: 0.7rem;
+            border-left: 4px solid #f9c74f;
+            font-size: 0.8rem;
+        }
+        .record-item strong {
+            color: #2b6e4f;
+        }
+        .empty-tip {
+            color: #9c988e;
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.85rem;
+        }
+
+        /* 模态框（图书借阅） */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: white;
+            max-width: 420px;
+            width: 90%;
+            border-radius: 32px;
+            padding: 1.8rem;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.2);
+        }
+        .modal-content h3 {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-close {
+            cursor: pointer;
+            font-size: 1.3rem;
+            background: none;
+            border: none;
+        }
+        .modal-borrow-btn {
+            background: #2b6e4f;
+            margin-top: 0.5rem;
+        }
+        hr {
+            margin: 1rem 0;
+            border-color: #ece6da;
+        }
+
+        @media (max-width: 880px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-header h1 {
+                font-size: 1.5rem;
+            }
+        }
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding: 1rem;
+            color: #7b776c;
+            font-size: 0.75rem;
+            border-top: 1px solid #e2dbcc;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- 头部社区信息 -->
+    <div class="hero-header">
+        <h1>
+            <i class="fas fa-tree"></i> 
+            科育社区 · 书香邻里
+            <span class="badge-community"><i class="fas fa-hand-peace"></i> 共享图书 · 活力空间</span>
+        </h1>
+        <p>📖 图书借阅 · 🏠 活动室预约 | 共建温暖人文社区，智慧服务触手可及</p>
+    </div>
+
+    <!-- 核心区域双列布局 -->
+    <div class="dashboard-grid">
+        <!-- 左侧：图书借阅模块 -->
+        <div class="books-section">
+            <div class="section-title">
+                <i class="fas fa-book-open" style="color:#2b6e4f;"></i> 
+                图书借阅 · 馆藏推荐
+            </div>
+            <div class="books-grid" id="booksGrid"></div>
+            <div style="font-size:0.7rem; margin-top: 1rem; color:#a09886; text-align:center;">
+                <i class="fas fa-id-card"></i> 社区成员凭身份信息即可借阅，每次最多3本，借期30天。
+            </div>
+        </div>
+
+        <!-- 右侧：活动室预约 + 规则 + 近期记录 -->
+        <div class="right-panel">
+            <!-- 活动室规则卡片 -->
+            <div class="rules-card">
+                <div class="rule-title">
+                    <i class="fas fa-door-open"></i> 邻里活动室 · 使用守则
+                </div>
+                <ul class="rule-list">
+                    <li><i class="fas fa-clock"></i> 开放时间：每日 08:30 - 21:00 (节假日无休)</li>
+                    <li><i class="fas fa-hourglass-half"></i> 单次预约最长3小时，同一团队每天限约1次</li>
+                    <li><i class="fas fa-users"></i> 最多容纳15人，禁止大声喧哗，爱护公物</li>
+                    <li><i class="fas fa-calendar-check"></i> 需提前1天预约，取消请提前2小时联系社区</li>
+                    <li><i class="fas fa-hand-sparkles"></i> 保持室内清洁，使用后恢复桌椅，垃圾分类</li>
+                    <li><i class="fas fa-shield-alt"></i> 活动室配备老花镜、饮水机，公益优先</li>
+                </ul>
+            </div>
+
+            <!-- 预约表单卡片 -->
+            <div class="booking-card">
+                <div class="rule-title">
+                    <i class="fas fa-calendar-plus"></i> 活动室预约申请
+                </div>
+                <form id="roomBookingForm">
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar-day"></i> 预约日期 *</label>
+                        <input type="date" id="bookingDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-hourglass-start"></i> 时段 *</label>
+                        <select id="bookingTimeSlot" required>
+                            <option value="">请选择时段</option>
+                            <option value="09:00-12:00">上午场 09:00-12:00</option>
+                            <option value="14:00-17:00">下午场 14:00-17:00</option>
+                            <option value="18:00-21:00">晚间场 18:00-21:00</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> 申请人姓名 *</label>
+                        <input type="text" id="applicantName" placeholder="例如：张明" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-phone-alt"></i> 联系电话 *</label>
+                        <input type="tel" id="applicantPhone" placeholder="手机号" required>
+                    </div>
+                    <button type="submit" class="submit-btn"><i class="fas fa-check-circle"></i> 提交预约申请</button>
+                </form>
+            </div>
+
+            <!-- 近期预约记录展示（交互反馈） -->
+            <div class="recent-card">
+                <div class="rule-title">
+                    <i class="fas fa-list-ul"></i> 最近预约动态
+                </div>
+                <div id="recentAppointmentsList" class="recent-list">
+                    <div class="empty-tip">暂无预约记录，快提交第一个预约吧~</div>
+                </div>
+                <p style="font-size:0.7rem; margin-top: 0.7rem; color:#928e82;"><i class="fas fa-sync-alt"></i> 预约成功后将实时显示，仅作演示展示</p>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <i class="fas fa-leaf"></i> 科育社区党群服务中心 · 智慧服务系统 | 图书借阅请点击卡片“预约借阅”，活动室预约需实名登记
+    </footer>
+</div>
+
+<!-- 图书借阅模态框 (动态填写信息) -->
+<div id="borrowModal" class="modal">
+    <div class="modal-content">
+        <h3>
+            <span><i class="fas fa-book"></i> 借阅登记</span>
+            <button class="modal-close" id="closeModalBtn">&times;</button>
+        </h3>
+        <div id="modalBookInfo" style="background:#f3f0e8; padding:8px 12px; border-radius:20px; margin-bottom:1rem; font-size:0.85rem;"></div>
+        <form id="borrowForm">
+            <div class="form-group">
+                <label>读者姓名 *</label>
+                <input type="text" id="borrowerName" placeholder="真实姓名" required>
+            </div>
+            <div class="form-group">
+                <label>联系电话 *</label>
+                <input type="tel" id="borrowerPhone" placeholder="手机号码" required>
+            </div>
+            <div class="form-group">
+                <label>社区门牌/备注 (选填)</label>
+                <input type="text" id="borrowerAddress" placeholder="例如: 科育小区12号楼301">
+            </div>
+            <button type="submit" class="submit-btn modal-borrow-btn">确认借阅</button>
+        </form>
+        <hr>
+        <p style="font-size:0.7rem; text-align:center;">* 虚拟登记服务，请至社区图书室办理实际取书</p>
+    </div>
+</div>
+
+<script>
+    // ----------------------------- 1. 虚构图书数据 -------------------------
+    const booksData = [
+    { id: 1, title: "社区花园营造指南", author: "自然之友", icon: "fas fa-seedling", status: "可借", available: true },
+    { id: 2, title: "亲子沟通的艺术", author: "李蕴华", icon: "fas fa-heart", status: "可借", available: true },
+    { id: 3, title: "编程思维启蒙", author: "周明远", icon: "fas fa-code", status: "可借", available: true },
+    { id: 4, title: "科育记忆 · 老照片故事", author: "社区编委会", icon: "fas fa-images", status: "可借", available: true },
+    { id: 5, title: "四季健康膳食", author: "营养家工作组", icon: "fas fa-carrot", status: "可借", available: true },
+    { id: 6, title: "小小科学家实验室", author: "科技志愿者队", icon: "fas fa-flask", status: "可借", available: true },
+    { id: 7, title: "老年人智能手机使用手册", author: "银发数字课堂编委会", icon: "fas fa-mobile-alt", status: "可借", available: true },
+    { id: 8, title: "家常面点轻松做", author: "王秀云", icon: "fas fa-bread-slice", status: "可借", available: true },
+    { id: 9, title: "社区垃圾分类实操指南", author: "环保科普小组", icon: "fas fa-recycle", status: "可借", available: true },
+    { id: 10, title: "中国传统节日故事集", author: "民俗文化研究会", icon: "fas fa-calendar-day", status: "可借", available: true },
+    { id: 11, title: "零基础学书法", author: "陈墨轩", icon: "fas fa-pen-fancy", status: "可借", available: true },
+    { id: 12, title: "家庭盆栽养护大全", author: "绿手指园艺社", icon: "fas fa-leaf", status: "可借", available: true },
+    { id: 13, title: "退休生活规划指南", author: "幸福晚年编辑部", icon: "fas fa-chair", status: "可借", available: true },
+    { id: 14, title: "儿童安全防护手册", author: "儿童保护协会", icon: "fas fa-shield-heart", status: "可借", available: true },
+    { id: 15, title: "太极拳入门教程", author: "杨明远", icon: "fas fa-person-running", status: "可借", available: true },
+    { id: 16, title: "家常煲汤100例", author: "林小厨", icon: "fas fa-mug-hot", status: "可借", available: true },
+    { id: 17, title: "社区邻里调解案例集", author: "基层治理研究组", icon: "fas fa-handshake-angle", status: "可借", available: true },
+    { id: 18, title: "少儿简笔画教程", author: "童画美术工作室", icon: "fas fa-palette", status: "可借", available: true },
+    { id: 19, title: "中医养生小常识", author: "国医堂编委会", icon: "fas fa-herb", status: "可借", available: true },
+    { id: 20, title: "经典儿歌300首", author: "金宝贝音乐社", icon: "fas fa-music", status: "可借", available: true },
+    { id: 21, title: "家庭急救知识手册", author: "红十字会培训中心", icon: "fas fa-first-aid", status: "可借", available: true },
+    { id: 22, title: "老北京胡同故事", author: "京味文化研究会", icon: "fas fa-street-view", status: "可借", available: true },
+    { id: 23, title: "零基础学广场舞", author: "快乐舞步舞团", icon: "fas fa-dancing", status: "可借", available: true },
+    { id: 24, title: "小学生作文起步", author: "语文教研中心", icon: "fas fa-book-journal-whills", status: "可借", available: true },
+    { id: 25, title: "家庭收纳整理术", author: "整理生活工作室", icon: "fas fa-boxes-stacked", status: "可借", available: true },
+    { id: 26, title: "二十四节气养生法", author: "养生堂专家组", icon: "fas fa-sun", status: "可借", available: true },
+    { id: 27, title: "围棋入门与提高", author: "棋院教研组", icon: "fas fa-chess-board", status: "可借", available: true },
+    { id: 28, title: "社区志愿服务指南", author: "志愿者协会", icon: "fas fa-hands-helping", status: "可借", available: true },
+    { id: 29, title: "幼儿绘本故事集", author: "亲子阅读推广中心", icon: "fas fa-book-baby", status: "可借", available: true },
+    { id: 30, title: "家常凉拌菜80例", author: "夏日轻食社", icon: "fas fa-salad", status: "可借", available: true },
+    { id: 31, title: "中国通史简编", author: "历史研究社", icon: "fas fa-landmark", status: "可借", available: true },
+    { id: 32, title: "手机摄影技巧大全", author: "光影摄影社", icon: "fas fa-camera-retro", status: "可借", available: true },
+    { id: 33, title: "老年人心理健康指南", author: "心理疏导工作室", icon: "fas fa-brain", status: "可借", available: true },
+    { id: 34, title: "折纸艺术大全", author: "纸艺手工社", icon: "fas fa-cube", status: "可借", available: true },
+    { id: 35, title: "社区消防安全手册", author: "消防科普中心", icon: "fas fa-fire-extinguisher", status: "可借", available: true },
+    { id: 36, title: "唐诗三百首精选", author: "古典文学研究会", icon: "fas fa-book-open-reader", status: "可借", available: true },
+    { id: 37, title: "家庭烘焙入门", author: "甜星烘焙工作室", icon: "fas fa-cookie-bite", status: "可借", available: true },
+    { id: 38, title: "宠物饲养常识", author: "爱宠之家编委会", icon: "fas fa-paw", status: "可借", available: true },
+    { id: 39, title: "硬笔书法速成", author: "硬笔书法协会", icon: "fas fa-pen", status: "可借", available: true },
+    { id: 40, title: "社区文化活动策划", author: "文化站工作组", icon: "fas fa-bullhorn", status: "可借", available: true },
+    { id: 41, title: "少儿英语启蒙儿歌", author: "英乐启蒙社", icon: "fas fa-headphones", status: "可借", available: true },
+    { id: 42, title: "高血压饮食指南", author: "慢病管理中心", icon: "fas fa-pills", status: "可借", available: true },
+    { id: 43, title: "象棋入门教程", author: "象棋协会", icon: "fas fa-chess-king", status: "可借", available: true },
+    { id: 44, title: "家庭养花实用技巧", author: "花艺爱好者协会", icon: "fas fa-flower", status: "可借", available: true },
+    { id: 45, title: "社区普法知识读本", author: "司法所编委会", icon: "fas fa-gavel", status: "可借", available: true },
+    { id: 46, title: "睡前故事365夜", author: "亲子故事社", icon: "fas fa-moon", status: "可借", available: true },
+    { id: 47, title: "广场舞金曲大全", author: "舞林大会编委会", icon: "fas fa-record-vinyl", status: "可借", available: true },
+    { id: 48, title: "家庭理财入门", author: "财商教育中心", icon: "fas fa-coins", status: "可借", available: true },
+    { id: 49, title: "手工编织教程", author: "编织爱好者协会", icon: "fas fa-yarn", status: "可借", available: true },
+    { id: 50, title: "中国传统手工艺", author: "非遗保护中心", icon: "fas fa-hammer", status: "可借", available: true },
+    { id: 51, title: "小学生必背古诗词", author: "小学语文教研组", icon: "fas fa-scroll", status: "可借", available: true },
+    { id: 52, title: "家庭清洁小妙招", author: "清洁达人工作室", icon: "fas fa-broom", status: "可借", available: true },
+    { id: 53, title: "太极拳养生功", author: "太极养生社", icon: "fas fa-person-snowboarding", status: "可借", available: true },
+    { id: 54, title: "社区养老服务指南", author: "养老服务中心", icon: "fas fa-hands-holding-child", status: "可借", available: true },
+    { id: 55, title: "少儿科学小实验", author: "小小科学家工作室", icon: "fas fa-microscope", status: "可借", available: true },
+    { id: 56, title: "家常川菜做法", author: "川味厨房", icon: "fas fa-pepper-hot", status: "可借", available: true },
+    { id: 57, title: "摄影构图技巧", author: "摄影爱好者协会", icon: "fas fa-image", status: "可借", available: true },
+    { id: 58, title: "心理健康疏导手册", author: "心理咨询中心", icon: "fas fa-heart-pulse", status: "可借", available: true },
+    { id: 59, title: "儿童绘本：好习惯养成", author: "成长树绘本馆", icon: "fas fa-child-reaching", status: "可借", available: true },
+    { id: 60, title: "社区应急避险指南", author: "应急管理办公室", icon: "fas fa-triangle-exclamation", status: "可借", available: true },
+    { id: 61, title: "毛笔字入门字帖", author: "书法培训中心", icon: "fas fa-brush", status: "可借", available: true },
+    { id: 62, title: "家庭自制酱料大全", author: "调味大师工作室", icon: "fas fa-jar", status: "可借", available: true },
+    { id: 63, title: "中国神话故事集", author: "神话研究会", icon: "fas fa-dragon", status: "可借", available: true },
+    { id: 64, title: "广场舞编排技巧", author: "舞蹈编导组", icon: "fas fa-users-viewfinder", status: "可借", available: true },
+    { id: 65, title: "小学生数学思维训练", author: "数学教研中心", icon: "fas fa-calculator", status: "可借", available: true },
+    { id: 66, title: "家庭园艺病虫害防治", author: "园艺植保中心", icon: "fas fa-bug", status: "可借", available: true },
+    { id: 67, title: "老年人防诈骗指南", author: "反诈中心编委会", icon: "fas fa-lock", status: "可借", available: true },
+    { id: 68, title: "手工DIY小制作", author: "创意手工社", icon: "fas fa-scissors", status: "可借", available: true },
+    { id: 69, title: "社区文化建设案例", author: "文化建设研究会", icon: "fas fa-building-columns", status: "可借", available: true },
+    { id: 70, title: "经典寓言故事选", author: "寓言文学研究会", icon: "fas fa-book-atlas", status: "可借", available: true },
+    { id: 71, title: "家庭瑜伽入门", author: "瑜伽教练组", icon: "fas fa-person-praying", status: "可借", available: true },
+    { id: 72, title: "家常东北菜做法", author: "东北风味厨房", icon: "fas fa-drumstick-bite", status: "可借", available: true },
+    { id: 73, title: "手机短视频制作", author: "短视频创作社", icon: "fas fa-video", status: "可借", available: true },
+    { id: 74, title: "儿童安全教育绘本", author: "安全童行工作室", icon: "fas fa-stop-sign", status: "可借", available: true },
+    { id: 75, title: "社区垃圾分类宣传册", author: "垃圾分类办公室", icon: "fas fa-trash-can", status: "可借", available: true },
+    { id: 76, title: "宋词精选赏析", author: "古典诗词研究会", icon: "fas fa-feather-pointed", status: "可借", available: true },
+    { id: 77, title: "家庭自制酸奶教程", author: "轻食主义工作室", icon: "fas fa-yogurt", status: "可借", available: true },
+    { id: 78, title: "围棋死活题入门", author: "围棋道场", icon: "fas fa-chess-pawn", status: "可借", available: true },
+    { id: 79, title: "社区志愿者培训手册", author: "志愿者服务中心", icon: "fas fa-vest-patches", status: "可借", available: true },
+    { id: 80, title: "幼儿英语启蒙绘本", author: "英语启蒙工作室", icon: "fas fa-book-sparkles", status: "可借", available: true },
+    { id: 81, title: "高血脂饮食宜忌", author: "营养膳食中心", icon: "fas fa-utensils", status: "可借", available: true },
+    { id: 82, title: "硬笔书法字帖大全", author: "硬笔书法研究会", icon: "fas fa-pencil-alt", status: "可借", available: true },
+    { id: 83, title: "社区邻里文化活动案例", author: "邻里文化促进会", icon: "fas fa-people-group", status: "可借", available: true },
+    { id: 84, title: "睡前胎教故事", author: "母婴关爱中心", icon: "fas fa-baby-carriage", status: "可借", available: true },
+    { id: 85, title: "家庭烘焙饼干做法", author: "烘焙爱好者协会", icon: "fas fa-biscuit", status: "可借", available: true },
+    { id: 86, title: "中国近代史简明教程", author: "近代史研究组", icon: "fas fa-monument", status: "可借", available: true },
+    { id: 87, title: "手机修图技巧", author: "修图达人工作室", icon: "fas fa-wand-magic-sparkles", status: "可借", available: true },
+    { id: 88, title: "老年人关节养护指南", author: "骨科康复中心", icon: "fas fa-bone", status: "可借", available: true },
+    { id: 89, title: "手工剪纸教程", author: "剪纸艺术协会", icon: "fas fa-cut", status: "可借", available: true },
+    { id: 90, title: "社区环境整治手册", author: "环境整治办公室", icon: "fas fa-globe-asia", status: "可借", available: true },
+    { id: 91, title: "小学生课外阅读精选", author: "课外阅读推广中心", icon: "fas fa-book-bookmark", status: "可借", available: true },
+    { id: 92, title: "家庭除味小妙招", author: "生活妙招工作室", icon: "fas fa-wind", status: "可借", available: true },
+    { id: 93, title: "八段锦教学视频配套手册", author: "养生功法研究会", icon: "fas fa-person-digging", status: "可借", available: true },
+    { id: 94, title: "社区托育服务指南", author: "托育服务中心", icon: "fas fa-children", status: "可借", available: true },
+    { id: 95, title: "少儿机器人编程入门", author: "机器人教育协会", icon: "fas fa-robot", status: "可借", available: true },
+    { id: 96, title: "家常粤菜做法大全", author: "粤味厨房", icon: "fas fa-fish-fins", status: "可借", available: true },
+    { id: 97, title: "摄影用光技巧", author: "光影工作室", icon: "fas fa-lightbulb", status: "可借", available: true },
+    { id: 98, title: "情绪管理小妙招", author: "情绪疏导工作室", icon: "fas fa-face-smile-beam", status: "可借", available: true },
+    { id: 99, title: "儿童科普绘本：奇妙的自然", author: "自然科普工作室", icon: "fas fa-mountain-sun", status: "可借", available: true },
+    { id: 100, title: "社区防汛抗旱指南", author: "防汛抗旱办公室", icon: "fas fa-water", status: "可借", available: true },
+    { id: 101, title: "软笔书法创作技巧", author: "书法创作研究会", icon: "fas fa-fountain-pen", status: "可借", available: true },
+    { id: 102, title: "家庭自制泡菜教程", author: "泡菜爱好者协会", icon: "fas fa-jar-preserves", status: "可借", available: true },
+    { id: 103, title: "民间故事大全", author: "民间文艺研究会", icon: "fas fa-book-tanakh", status: "可借", available: true },
+    { id: 104, title: "广场舞音乐编排", author: "音乐编排工作室", icon: "fas fa-music-slash", status: "可借", available: true },
+    { id: 105, title: "小学生作文素材大全", author: "作文素材编辑部", icon: "fas fa-file-pen", status: "可借", available: true },
+    { id: 106, title: "阳台种菜实用指南", author: "都市农夫工作室", icon: "fas fa-trowel", status: "可借", available: true },
+    { id: 107, title: "老年人防跌倒指南", author: "老年护理中心", icon: "fas fa-person-falling", status: "可借", available: true },
+    { id: 108, title: "手工陶艺制作入门", author: "陶艺工作室", icon: "fas fa-pottery", status: "可借", available: true },
+    { id: 109, title: "社区党建工作案例", author: "党建研究会", icon: "fas fa-flag", status: "可借", available: true },
+    { id: 110, title: "成语故事大全", author: "语言文字研究会", icon: "fas fa-book-club", status: "可借", available: true },
+    { id: 111, title: "普拉提入门教程", author: "普拉提教练组", icon: "fas fa-person-lifting", status: "可借", available: true },
+    { id: 112, title: "家常鲁菜做法", author: "鲁味厨房", icon: "fas fa-steak", status: "可借", available: true },
+    { id: 113, title: "直播带货入门", author: "电商培训中心", icon: "fas fa-tower-broadcast", status: "可借", available: true },
+    { id: 114, title: "儿童性教育绘本", author: "性教育研究会", icon: "fas fa-venus-mars", status: "可借", available: true },
+    { id: 115, title: "社区节能降耗指南", author: "节能办公室", icon: "fas fa-light-switch", status: "可借", available: true },
+    { id: 116, title: "元曲精选赏析", author: "元曲研究会", icon: "fas fa-masks-theater", status: "可借", available: true },
+    { id: 117, title: "家庭自制冰淇淋教程", author: "甜品工作室", icon: "fas fa-ice-cream", status: "可借", available: true },
+    { id: 118, title: "象棋残局解析", author: "象棋残局研究会", icon: "fas fa-chess-knight", status: "可借", available: true },
+    { id: 119, title: "社区文化礼堂运营指南", author: "文化礼堂管理中心", icon: "fas fa-theater-masks", status: "可借", available: true },
+    { id: 120, title: "幼儿行为习惯培养", author: "幼儿教育研究会", icon: "fas fa-person-burst", status: "可借", available: true },
+    { id: 121, title: "糖尿病饮食指南", author: "糖尿病管理中心", icon: "fas fa-droplet", status: "可借", available: true },
+    { id: 122, title: "粉笔字书写技巧", author: "教师技能培训中心", icon: "fas fa-chalkboard-user", status: "可借", available: true },
+    { id: 123, title: "社区睦邻友好公约范例", author: "睦邻友好促进会", icon: "fas fa-house-chimney-user", status: "可借", available: true },
+    { id: 124, title: "亲子手工DIY", author: "亲子手工社", icon: "fas fa-hands-holding-circle", status: "可借", available: true },
+    { id: 125, title: "家庭面包制作教程", author: "面包烘焙社", icon: "fas fa-baguette", status: "可借", available: true },
+    { id: 126, title: "世界历史简编", author: "世界史研究组", icon: "fas fa-globe-americas", status: "可借", available: true },
+    { id: 127, title: "无人机航拍技巧", author: "航拍爱好者协会", icon: "fas fa-helicopter", status: "可借", available: true },
+    { id: 128, title: "老年人睡眠改善指南", author: "睡眠研究中心", icon: "fas fa-bed", status: "可借", available: true },
+    { id: 129, title: "手工皂制作教程", author: "手工皂工作室", icon: "fas fa-soap", status: "可借", available: true },
+    { id: 130, title: "社区网格化管理手册", author: "网格化管理办公室", icon: "fas fa-table-cells-large", status: "可借", available: true },
+    { id: 131, title: "初中生必背古诗文", author: "初中语文教研组", icon: "fas fa-book-tome", status: "可借", available: true },
+    { id: 132, title: "卫生间清洁技巧", author: "清洁技巧工作室", icon: "fas fa-toilet", status: "可借", available: true },
+    { id: 133, title: "五禽戏教学手册", author: "传统功法研究会", icon: "fas fa-dove", status: "可借", available: true },
+    { id: 134, title: "社区适老化改造指南", author: "适老化改造办公室", icon: "fas fa-person-walking-with-cane", status: "可借", available: true },
+    { id: 135, title: "少儿3D打印入门", author: "3D打印教育协会", icon: "fas fa-cubes-stacked", status: "可借", available: true },
+    { id: 136, title: "家常淮扬菜做法", author: "淮扬厨房", icon: "fas fa-spoon", status: "可借", available: true },
+    { id: 137, title: "Vlog制作教程", author: "Vlog创作社", icon: "fas fa-clapperboard", status: "可借", available: true },
+    { id: 138, title: "压力缓解小技巧", author: "压力管理中心", icon: "fas fa-person-relaxing", status: "可借", available: true },
+    { id: 139, title: "儿童天文科普绘本", author: "天文科普工作室", icon: "fas fa-star", status: "可借", available: true },
+    { id: 140, title: "社区防震减灾指南", author: "防震减灾办公室", icon: "fas fa-house-crack", status: "可借", available: true },
+    { id: 141, title: "书法作品装裱技巧", author: "装裱工作室", icon: "fas fa-frame", status: "可借", available: true },
+    { id: 142, title: "家庭自制肉酱教程", author: "肉酱爱好者协会", icon: "fas fa-meat", status: "可借", available: true },
+    { id: 143, title: "科幻故事精选", author: "科幻文学研究会", icon: "fas fa-rocket", status: "可借", available: true },
+    { id: 144, title: "曳步舞入门教程", author: "曳步舞舞团", icon: "fas fa-shoe-prints", status: "可借", available: true },
+    { id: 145, title: "初中生数学思维训练", author: "初中数学教研组", icon: "fas fa-square-root-variable", status: "可借", available: true },
+    { id: 146, title: "室内观叶植物养护", author: "观叶植物协会", icon: "fas fa-sprout", status: "可借", available: true },
+    { id: 147, title: "老年人听力保护指南", author: "耳鼻喉科中心", icon: "fas fa-ear-listen", status: "可借", available: true },
+    { id: 148, title: "手工蜡烛制作教程", author: "蜡烛制作工作室", icon: "fas fa-candle", status: "可借", available: true },
+    { id: 149, title: "社区新时代文明实践案例", author: "文明实践办公室", icon: "fas fa-hands-praying", status: "可借", available: true },
+    { id: 150, title: "侦探故事大全", author: "侦探文学研究会", icon: "fas fa-magnifying-glass", status: "可借", available: true },
+    { id: 151, title: "瑜伽冥想入门", author: "冥想研究会", icon: "fas fa-om", status: "可借", available: true },
+    { id: 152, title: "家常浙菜做法", author: "浙味厨房", icon: "fas fa-rice-bowl", status: "可借", available: true },
+    { id: 153, title: "公众号运营入门", author: "新媒体运营中心", icon: "fas fa-paper-plane", status: "可借", available: true },
+    { id: 154, title: "儿童财商启蒙绘本", author: "财商启蒙工作室", icon: "fas fa-wallet", status: "可借", available: true },
+    { id: 155, title: "社区垃圾分类督导员手册", author: "垃圾分类督导中心", icon: "fas fa-user-shield", status: "可借", available: true },
+    { id: 156, title: "纳兰词精选赏析", author: "清代诗词研究会", icon: "fas fa-heart-crack", status: "可借", available: true },
+    { id: 157, title: "家庭自制果酒教程", author: "果酒爱好者协会", icon: "fas fa-wine-glass", status: "可借", available: true },
+    { id: 158, title: "五子棋入门教程", author: "五子棋协会", icon: "fas fa-circle-dot", status: "可借", available: true },
+    { id: 159, title: "社区公益活动策划指南", author: "公益活动策划中心", icon: "fas fa-hands-holding-dollar", status: "可借", available: true },
+    { id: 160, title: "幼儿古诗启蒙", author: "古诗启蒙工作室", icon: "fas fa-book-open", status: "可借", available: true },
+    { id: 161, title: "痛风饮食指南", author: "痛风管理中心", icon: "fas fa-gout", status: "可借", available: true },
+    { id: 162, title: "马克笔绘画教程", author: "马克笔绘画协会", icon: "fas fa-pen-ruler", status: "可借", available: true },
+    { id: 163, title: "社区协商议事规则", author: "协商议事研究会", icon: "fas fa-comments", status: "可借", available: true },
+    { id: 164, title: "产后恢复指南", author: "产后护理中心", icon: "fas fa-person-baby", status: "可借", available: true },
+    { id: 165, title: "家庭披萨制作教程", author: "披萨爱好者协会", icon: "fas fa-pizza-slice", status: "可借", available: true },
+    { id: 166, title: "中国书法史简编", author: "书法史研究组", icon: "fas fa-scroll-old", status: "可借", available: true },
+    { id: 167, title: "短视频剪辑技巧", author: "剪辑工作室", icon: "fas fa-scissors-cut", status: "可借", available: true },
+    { id: 168, title: "老年人视力保护指南", author: "眼科中心", icon: "fas fa-eye", status: "可借", available: true },
+    { id: 169, title: "手工编织包包教程", author: "编织包包工作室", icon: "fas fa-handbag", status: "可借", available: true },
+    { id: 170, title: "社区物业管理指南", author: "物业管理协会", icon: "fas fa-building-user", status: "可借", available: true },
+    { id: 171, title: "高中生必背古诗文", author: "高中语文教研组", icon: "fas fa-book-journal-whills", status: "可借", available: true },
+    { id: 172, title: "厨房收纳技巧", author: "厨房收纳工作室", icon: "fas fa-utensils-set", status: "可借", available: true },
+    { id: 173, title: "太极剑入门教程", author: "太极剑研究会", icon: "fas fa-sword", status: "可借", available: true },
+    { id: 174, title: "社区青少年活动策划", author: "青少年活动中心", icon: "fas fa-person-skating", status: "可借", available: true },
+    { id: 175, title: "少儿编程Scratch入门", author: "编程教育协会", icon: "fas fa-code-branch", status: "可借", available: true },
+    { id: 176, title: "家常闽菜做法", author: "闽味厨房", icon: "fas fa-shrimp", status: "可借", available: true },
+    { id: 177, title: "直播话术技巧", author: "直播话术研究会", icon: "fas fa-bullseye", status: "可借", available: true },
+    { id: 178, title: "焦虑情绪疏导手册", author: "焦虑疏导中心", icon: "fas fa-face-frown-open", status: "可借", available: true },
+    { id: 179, title: "儿童海洋科普绘本", author: "海洋科普工作室", icon: "fas fa-water-ladder", status: "可借", available: true },
+    { id: 180, title: "社区森林防火指南", author: "森林防火办公室", icon: "fas fa-fire-flame-curved", status: "可借", available: true },
+    { id: 181, title: "篆刻入门教程", author: "篆刻艺术协会", icon: "fas fa-stamp", status: "可借", available: true },
+    { id: 182, title: "家庭自制肉松教程", author: "肉松爱好者协会", icon: "fas fa-bacon", status: "可借", available: true },
+    { id: 183, title: "童话故事精选", author: "童话文学研究会", icon: "fas fa-fairy-wand-sparkles", status: "可借", available: true },
+    { id: 184, title: "水兵舞入门教程", author: "水兵舞舞团", icon: "fas fa-anchor", status: "可借", available: true },
+    { id: 185, title: "高中生作文写作技巧", author: "高中作文教研组", icon: "fas fa-file-signature", status: "可借", available: true },
+    { id: 186, title: "多肉植物养护大全", author: "多肉爱好者协会", icon: "fas fa-cactus", status: "可借", available: true },
+    { id: 187, title: "老年人口腔护理指南", author: "口腔护理中心", icon: "fas fa-tooth", status: "可借", available: true },
+    { id: 188, title: "手工发饰制作教程", author: "发饰制作工作室", icon: "fas fa-crown", status: "可借", available: true },
+    { id: 189, title: "社区廉洁文化建设", author: "廉洁文化研究会", icon: "fas fa-scale-balanced", status: "可借", available: true },
+    { id: 190, title: "历史典故大全", author: "历史典故研究会", icon: "fas fa-landmark-dome", status: "可借", available: true },
+    { id: 191, title: "动感单车入门教程", author: "动感单车教练组", icon: "fas fa-person-biking", status: "可借", available: true },
+    { id: 192, title: "家常湘菜做法", author: "湘味厨房", icon: "fas fa-chili-hot", status: "可借", available: true },
+    { id: 193, title: "小红书运营技巧", author: "小红书运营中心", icon: "fas fa-book-heart", status: "可借", available: true },
+    { id: 194, title: "儿童职业启蒙绘本", author: "职业启蒙工作室", icon: "fas fa-briefcase", status: "可借", available: true },
+    { id: 195, title: "社区节约用水指南", author: "节约用水办公室", icon: "fas fa-faucet-drip", status: "可借", available: true },
+    { id: 196, title: "现代诗精选赏析", author: "现代诗研究会", icon: "fas fa-feather", status: "可借", available: true },
+    { id: 197, title: "家庭自制寿司教程", author: "寿司爱好者协会", icon: "fas fa-sushi", status: "可借", available: true },
+    { id: 198, title: "跳棋入门教程", author: "跳棋协会", icon: "fas fa-circle-nodes", status: "可借", available: true },
+    { id: 199, title: "社区老年大学课程指南", author: "老年大学教务处", icon: "fas fa-graduation-cap", status: "可借", available: true },
+    { id: 200, title: "幼儿英语分级阅读", author: "分级阅读工作室", icon: "fas fa-book-open-reader", status: "可借", available: true }
+];
+    
+    // 存储预约记录（初始化几条示例让展示不空，更生动）
+    let appointmentsArray = [
+        { id: "apt1", date: "2025-04-27", timeSlot: "14:00-17:00", name: "王丽丽", phone: "138****2210", createTime: "2025-04-25" },
+        { id: "apt2", date: "2025-04-28", timeSlot: "09:00-12:00", name: "张建平", phone: "159****4335", createTime: "2025-04-26" }
+    ];
+
+    // 当前选中的图书 (借阅弹窗用到)
+    let currentSelectedBook = null;
+
+    // ----------------------------- 2. 渲染图书网格 -------------------------
+    function renderBooks() {
+        const grid = document.getElementById('booksGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        booksData.forEach(book => {
+            const card = document.createElement('div');
+            card.className = 'book-card';
+            card.innerHTML = `
+                <div class="book-icon"><i class="${book.icon}"></i></div>
+                <div class="book-title">${escapeHtml(book.title)}</div>
+                <div class="book-author">${escapeHtml(book.author)}</div>
+                <span class="book-status"><i class="fas fa-check-circle"></i> ${book.status}</span>
+                <button class="btn-borrow" data-id="${book.id}"><i class="fas fa-hand-peace"></i> 预约借阅</button>
+            `;
+            grid.appendChild(card);
+        });
+        // 绑定每个借阅按钮事件
+        document.querySelectorAll('.btn-borrow').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const bookId = parseInt(btn.getAttribute('data-id'));
+                const book = booksData.find(b => b.id === bookId);
+                if (book) {
+                    openBorrowModal(book);
+                }
+            });
+        });
+    }
+
+    // 简单防XSS
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // 打开借阅模态框
+    const modal = document.getElementById('borrowModal');
+    const modalBookInfoDiv = document.getElementById('modalBookInfo');
+    function openBorrowModal(book) {
+        currentSelectedBook = book;
+        modalBookInfoDiv.innerHTML = `<i class="${book.icon}"></i> <strong>${escapeHtml(book.title)}</strong> — ${escapeHtml(book.author)} (在馆可借)`;
+        modal.style.display = 'flex';
+        document.getElementById('borrowerName').value = '';
+        document.getElementById('borrowerPhone').value = '';
+        document.getElementById('borrowerAddress').value = '';
+    }
+    function closeModal() {
+        modal.style.display = 'none';
+        currentSelectedBook = null;
+    }
+
+    // 图书借阅提交（模拟登记+成功反馈）
+    function handleBorrowSubmit(e) {
+        e.preventDefault();
+        const borrowerName = document.getElementById('borrowerName').value.trim();
+        const borrowerPhone = document.getElementById('borrowerPhone').value.trim();
+        if (!borrowerName || !borrowerPhone) {
+            alert('请填写姓名和联系电话～');
+            return;
+        }
+        if (!/^1[3-9]\d{9}$/.test(borrowerPhone) && !/^\d{7,11}$/.test(borrowerPhone)) {
+            alert('请填写有效的联系电话（手机/固话）');
+            return;
+        }
+        if (currentSelectedBook) {
+            // 模拟借阅成功提示
+            alert(`📚 借阅登记成功！\n读者：${borrowerName}\n图书：《${currentSelectedBook.title}》\n请于3日内携带有效证件至科育社区图书室取书。感谢您的支持！`);
+            closeModal();
+        } else {
+            alert('图书信息异常，请刷新后重试');
+        }
+    }
+
+    // -------------------------- 3. 活动室预约逻辑 + 渲染预约记录 -----------------
+    // 初始化日期控件的min为今天
+    function setMinDate() {
+        const today = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById('bookingDate');
+        if(dateInput) dateInput.min = today;
+    }
+
+    // 渲染预约记录列表
+    function renderAppointments() {
+        const container = document.getElementById('recentAppointmentsList');
+        if (!container) return;
+        if (appointmentsArray.length === 0) {
+            container.innerHTML = '<div class="empty-tip">✨ 暂无预约记录，成为第一个预约者吧</div>';
+            return;
+        }
+        // 按时间倒序排列(新建的显示在前)
+        const sorted = [...appointmentsArray].reverse();
+        container.innerHTML = '';
+        sorted.forEach(apt => {
+            const div = document.createElement('div');
+            div.className = 'record-item';
+            div.innerHTML = `
+                <div><strong><i class="fas fa-calendar-alt"></i> ${escapeHtml(apt.date)}  ${escapeHtml(apt.timeSlot)}</strong></div>
+                <div>👤 申请人：${escapeHtml(apt.name)} &nbsp;📞 ${escapeHtml(apt.phone)}</div>
+                <div style="font-size:0.7rem; color:#8f8b7c;">📋 预约成功，请准时到场</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // 添加新的预约记录
+    function addAppointment(date, timeSlot, name, phone) {
+        const newId = 'apt_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+        const newAppt = {
+            id: newId,
+            date: date,
+            timeSlot: timeSlot,
+            name: name,
+            phone: phone,
+            createTime: new Date().toISOString().split('T')[0]
+        };
+        appointmentsArray.push(newAppt);
+        renderAppointments();
+        // 自动滚动到记录区域，增强反馈
+        document.querySelector('.recent-card')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // 处理预约表单提交
+    function handleBookingSubmit(e) {
+        e.preventDefault();
+        const bookingDate = document.getElementById('bookingDate').value;
+        const timeSlot = document.getElementById('bookingTimeSlot').value;
+        const applicantName = document.getElementById('applicantName').value.trim();
+        const applicantPhone = document.getElementById('applicantPhone').value.trim();
+
+        if (!bookingDate) {
+            alert('请选择预约日期');
+            return;
+        }
+        if (!timeSlot) {
+            alert('请选择预约时段');
+            return;
+        }
+        if (!applicantName) {
+            alert('请填写申请人姓名');
+            return;
+        }
+        if (!applicantPhone) {
+            alert('请填写联系电话');
+            return;
+        }
+        // 简单手机号校验（宽松）
+        if (applicantPhone.length < 7) {
+            alert('请填写有效的联系电话');
+            return;
+        }
+        // 可选：检查是否已预约同一天同一时段？演示环境简洁，允许重复预约逻辑，不严格检查冲突，但可以增加提示社区弹性
+        // 为友好，给出预警但不阻止（社区原则提醒用户）
+        const existing = appointmentsArray.some(apt => apt.date === bookingDate && apt.timeSlot === timeSlot && apt.name === applicantName);
+        if (existing) {
+            if (!confirm('您似乎已经预约过该时段相同姓名记录，是否继续提交？可能会重复预约，请核实。')) {
+                return;
+            }
+        }
+        // 模拟成功
+        addAppointment(bookingDate, timeSlot, applicantName, applicantPhone);
+        alert(`🎉 预约成功！\n日期：${bookingDate} ${timeSlot}\n申请人：${applicantName}\n社区活动室已为您保留，请按时使用并遵守规则。`);
+        // 清空表单中姓名电话，但日期和时段保留方便再次预约？可置空姓名/电话
+        document.getElementById('applicantName').value = '';
+        document.getElementById('applicantPhone').value = '';
+        // 可选时段置空，日期不清空
+        document.getElementById('bookingTimeSlot').value = '';
+    }
+
+    // 初始化最近预约记录展示 + 必要时校验日期
+    function initApp() {
+        renderBooks();
+        setMinDate();
+        renderAppointments();
+        // 绑定表单事件
+        const bookingForm = document.getElementById('roomBookingForm');
+        if (bookingForm) bookingForm.addEventListener('submit', handleBookingSubmit);
+        const borrowForm = document.getElementById('borrowForm');
+        if (borrowForm) borrowForm.addEventListener('submit', handleBorrowSubmit);
+        const closeBtn = document.getElementById('closeModalBtn');
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        // 附加: 若是下午晚上时间快速演示，可以让默认日期为明天
+        const dateInput = document.getElementById('bookingDate');
+        if(dateInput && !dateInput.value) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            dateInput.value = tomorrow.toISOString().split('T')[0];
+        }
+    }
+
+    // 启动
+    initApp();
+</script>
+</body>
+</html>
