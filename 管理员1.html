@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>科育社区 · 后台管理系统 | 图书库存 & 预约管理</title>
+    <!-- Google Fonts & Font Awesome 6 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js 轻量图表库 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1efe7;
+            color: #1e2a1b;
+            line-height: 1.5;
+            padding: 0;
+        }
+
+        /* 整体布局 */
+        .admin-wrapper {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 20px 24px 40px;
+        }
+
+        /* 头部管理栏 */
+        .admin-header {
+            background: linear-gradient(135deg, #1a3f32 0%, #0f2c22 100%);
+            border-radius: 28px;
+            padding: 1.4rem 2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            color: white;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.1);
+        }
+        .admin-title h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .admin-title p {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            margin-top: 6px;
+        }
+        .stats-badge {
+            background: rgba(255,215,130,0.2);
+            backdrop-filter: blur(4px);
+            padding: 0.5rem 1rem;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .stats-badge i {
+            margin-right: 6px;
+            color: #f9c74f;
+        }
+
+        /* 概览卡片网格 */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.3rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 28px;
+            padding: 1rem 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border: 1px solid #e2dbc9;
+            transition: 0.2s;
+        }
+        .stat-left h4 {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #6b675b;
+            letter-spacing: 0.5px;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #2b6e4f;
+            line-height: 1.2;
+        }
+        .stat-icon {
+            font-size: 2.2rem;
+            color: #b7b09c;
+        }
+
+        /* 双栏主要内容区 */
+        .admin-dashboard {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 1.8rem;
+        }
+        /* 左侧-图书管理表格 */
+        .books-management, .appointments-management {
+            background: white;
+            border-radius: 28px;
+            padding: 1.5rem;
+            border: 1px solid #e9e2d2;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.02);
+            margin-bottom: 1.8rem;
+        }
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 1.2rem;
+            border-left: 5px solid #2b6e4f;
+            padding-left: 1rem;
+        }
+        .section-head h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        .badge-count {
+            background: #f2efe5;
+            padding: 0.2rem 0.8rem;
+            border-radius: 60px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .book-table-container {
+            overflow-x: auto;
+        }
+        .book-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        .book-table th, .book-table td {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 1px solid #ede8db;
+        }
+        .book-table th {
+            font-weight: 600;
+            color: #4a473b;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .status-available {
+            background: #e0f0e8;
+            color: #1f6e4a;
+        }
+        .status-borrowed {
+            background: #ffe3cf;
+            color: #bd6a1e;
+        }
+        .btn-sm {
+            background: none;
+            border: 1px solid #cbc3ae;
+            padding: 0.2rem 0.7rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            transition: 0.2s;
+        }
+        .btn-sm:hover {
+            background: #2b6e4f;
+            border-color: #2b6e4f;
+            color: white;
+        }
+        .btn-danger-sm {
+            border-color: #e4b7a1;
+            color: #b1623a;
+        }
+        .btn-danger-sm:hover {
+            background: #c75c2e;
+            border-color: #c75c2e;
+            color: white;
+        }
+
+        /* 右侧预约列表 + 活动图表 */
+        .appointments-management {
+            margin-bottom: 0;
+        }
+        .appointment-list {
+            max-height: 420px;
+            overflow-y: auto;
+        }
+        .appoint-item {
+            background: #fefcf7;
+            border-radius: 20px;
+            padding: 0.9rem;
+            margin-bottom: 0.8rem;
+            border: 1px solid #efe7d9;
+            transition: 0.1s;
+        }
+        .appoint-header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            margin-bottom: 6px;
+            flex-wrap: wrap;
+        }
+        .appoint-date {
+            color: #2b6e4f;
+        }
+        .appoint-info {
+            font-size: 0.75rem;
+            color: #5e5a4c;
+            margin: 5px 0;
+        }
+        .appoint-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 6px;
+        }
+        .chart-card {
+            background: white;
+            border-radius: 28px;
+            padding: 1rem 1rem 0.8rem;
+            margin-top: 1.5rem;
+            border: 1px solid #e9e2d2;
+        }
+        .chart-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+        }
+        canvas {
+            max-height: 180px;
+            width: 100%;
+        }
+        .empty-placeholder {
+            text-align: center;
+            padding: 2rem;
+            color: #b2aa93;
+        }
+        footer {
+            margin-top: 2.5rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #9a947f;
+            border-top: 1px solid #e0d9ca;
+            padding-top: 1rem;
+        }
+        @media (max-width: 880px) {
+            .admin-dashboard {
+                grid-template-columns: 1fr;
+            }
+            .admin-header {
+                flex-direction: column;
+                align-items: start;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="admin-wrapper">
+    <!-- 管理员头部 -->
+    <div class="admin-header">
+        <div class="admin-title">
+            <h1><i class="fas fa-shield-alt"></i> 科育社区 · 管理后台</h1>
+            <p><i class="fas fa-chalkboard-user"></i> 图书库存监控 · 活动室预约审批 · 社区数据看板</p>
+        </div>
+        <div class="stats-badge">
+            <i class="fas fa-rotate-right"></i> 实时同步 | 管理员权限
+        </div>
+    </div>
+
+    <!-- 关键指标卡片 -->
+    <div class="overview-grid" id="statsOverview">
+        <!-- 动态js填充 -->
+    </div>
+
+    <div class="admin-dashboard">
+        <!-- 左侧区域：图书管理 + 借阅历史模拟 -->
+        <div>
+            <!-- 图书库存管理表格 -->
+            <div class="books-management">
+                <div class="section-head">
+                    <h2><i class="fas fa-book"></i> 📚 馆藏图书管理</h2>
+                    <div class="badge-count" id="totalBooksCount">共0册</div>
+                </div>
+                <div class="book-table-container">
+                    <table class="book-table" id="bookManageTable">
+                        <thead>
+                            <tr><th>书名</th><th>作者</th><th>状态</th><th>操作</th></tr>
+                        </thead>
+                        <tbody id="bookTableBody"></tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 1rem; font-size:0.7rem; color:#958e78;"><i class="fas fa-info-circle"></i> 点击“标记归还”可改变图书状态，模拟管理员操作库存</div>
+            </div>
+
+            <!-- 近期待归还简报 (创意展示) -->
+            <div class="books-management" style="background:#faf8f2;">
+                <div class="section-head">
+                    <h2><i class="fas fa-clock"></i> 借阅动态 · 待办提醒</h2>
+                </div>
+                <div id="borrowNotifyArea" style="font-size:0.85rem;">
+                    <i class="fas fa-spinner fa-pulse"></i> 加载借阅数据...
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧区域：活动室预约管理 + 图表 -->
+        <div>
+            <div class="appointments-management">
+                <div class="section-head">
+                    <h2><i class="fas fa-door-open"></i> 🏠 活动室预约申请</h2>
+                    <div class="badge-count" id="apptCountBadge">0条</div>
+                </div>
+                <div id="appointmentListContainer" class="appointment-list">
+                    <!-- 动态预约列表 -->
+                </div>
+                <div style="margin-top: 0.8rem;">
+                    <button id="clearDemoAppointmentsBtn" class="btn-sm" style="background:#f3eee4;"><i class="fas fa-trash-alt"></i> 清除所有预约记录</button>
+                    <span style="margin-left: 10px; font-size:0.7rem; color:#7f7966;">支持管理员确认/删除操作</span>
+                </div>
+            </div>
+            <!-- 预约时段占比图表 -->
+            <div class="chart-card">
+                <h3><i class="fas fa-chart-pie"></i> 预约时段分布（近一周）</h3>
+                <canvas id="slotChart" width="400" height="180" style="max-height:180px;"></canvas>
+                <p style="font-size:0.65rem; color:#8b846e; text-align:center; margin-top: 8px;">基于当前预约数据动态统计</p>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <i class="fas fa-database"></i> 管理员专属 · 图书库存与活动室预约可视化 | 所有操作均同步前端状态
+    </footer>
+</div>
+
+<script>
+    // ---------- 数据定义：与前台协同保持一致 ----------
+    // 1. 图书数据 (扩展为包含借阅标记，增加借出模拟记录)
+    let booksInventory = [
+        { id: 1, title: "社区花园营造指南", author: "自然之友", icon: "fas fa-seedling", status: "可借", available: true, borrowedCount: 0 },
+        { id: 2, title: "亲子沟通的艺术", author: "李蕴华", icon: "fas fa-heart", status: "可借", available: true, borrowedCount: 0 },
+        { id: 3, title: "编程思维启蒙", author: "周明远", icon: "fas fa-code", status: "可借", available: true, borrowedCount: 0 },
+        { id: 4, title: "科育记忆 · 老照片故事", author: "社区编委会", icon: "fas fa-images", status: "可借", available: true, borrowedCount: 0 },
+        { id: 5, title: "四季健康膳食", author: "营养家工作组", icon: "fas fa-carrot", status: "可借", available: true, borrowedCount: 0 },
+        { id: 6, title: "小小科学家实验室", author: "科技志愿者队", icon: "fas fa-flask", status: "可借", available: true, borrowedCount: 0 }
+    ];
+    // 借阅记录数组 (模拟借阅历史)
+    let borrowRecords = [
+        { id: "bor1", bookId: 1, borrower: "刘敏", phone: "138****1122", borrowDate: "2026-04-20", dueDate: "2026-05-20", returned: false },
+        { id: "bor2", bookId: 3, borrower: "陈思远", phone: "159****3344", borrowDate: "2026-04-18", dueDate: "2026-05-18", returned: false }
+    ];
+
+    // 活动室预约记录 (与前端展示联动，并且管理员可增删改，初始数据沿用之前的加一点扩展)
+    let adminAppointments = [
+        { id: "apt_1", date: "2026-04-27", timeSlot: "14:00-17:00", name: "王丽丽", phone: "138****2210", createTime: "2026-04-25", status: "已确认" },
+        { id: "apt_2", date: "2026-04-28", timeSlot: "09:00-12:00", name: "张建平", phone: "159****4335", createTime: "2026-04-26", status: "待确认" },
+        { id: "apt_3", date: "2026-04-29", timeSlot: "18:00-21:00", name: "科育舞蹈队", phone: "188****6623", createTime: "2026-04-26", status: "已确认" }
+    ];
+
+    // 辅助函数
+    function updateStatsOverview() {
+        const totalBooks = booksInventory.length;
+        const availableBooks = booksInventory.filter(b => b.available === true).length;
+        const borrowedBooks = booksInventory.filter(b => !b.available).length;
+        const totalAppointments = adminAppointments.length;
+        const pendingAppointments = adminAppointments.filter(a => a.status === "待确认").length;
+        
+        const statsHtml = `
+            <div class="stat-card"><div class="stat-left"><h4>📚 馆藏总量</h4><div class="stat-number">${totalBooks}</div></div><div class="stat-icon"><i class="fas fa-layer-group"></i></div></div>
+            <div class="stat-card"><div class="stat-left"><h4>✅ 可借册数</h4><div class="stat-number">${availableBooks}</div></div><div class="stat-icon"><i class="fas fa-check-circle"></i></div></div>
+            <div class="stat-card"><div class="stat-left"><h4>📖 借出中</h4><div class="stat-number">${borrowedBooks}</div></div><div class="stat-icon"><i class="fas fa-book-open"></i></div></div>
+            <div class="stat-card"><div class="stat-left"><h4>📅 总预约数</h4><div class="stat-number">${totalAppointments}</div></div><div class="stat-icon"><i class="fas fa-calendar-week"></i></div></div>
+            <div class="stat-card"><div class="stat-left"><h4>⏳ 待确认预约</h4><div class="stat-number">${pendingAppointments}</div></div><div class="stat-icon"><i class="fas fa-hourglass-half"></i></div></div>
+        `;
+        document.getElementById('statsOverview').innerHTML = statsHtml;
+        document.getElementById('totalBooksCount').innerText = `共${totalBooks}册`;
+        document.getElementById('apptCountBadge').innerText = `${totalAppointments}条`;
+    }
+
+    // 渲染图书管理表格 (支持管理员变更“借出/归还”)
+    function renderBookManagement() {
+        const tbody = document.getElementById('bookTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        booksInventory.forEach(book => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = book.title;
+            row.insertCell(1).innerText = book.author;
+            const statusCell = row.insertCell(2);
+            const statusText = book.available ? "可借" : "借出中";
+            const statusClass = book.available ? "status-available" : "status-borrowed";
+            statusCell.innerHTML = `<span class="status-badge ${statusClass}"><i class="${book.available ? 'fas fa-check' : 'fas fa-book'}"></i> ${statusText}</span>`;
+            const actionCell = row.insertCell(3);
+            if (book.available) {
+                // 模拟借出操作
+                const borrowBtn = document.createElement('button');
+                borrowBtn.className = 'btn-sm';
+                borrowBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> 借出';
+                borrowBtn.onclick = () => markBookBorrow(book.id);
+                actionCell.appendChild(borrowBtn);
+            } else {
+                const returnBtn = document.createElement('button');
+                returnBtn.className = 'btn-sm';
+                returnBtn.innerHTML = '<i class="fas fa-undo-alt"></i> 标记归还';
+                returnBtn.onclick = () => markBookReturn(book.id);
+                actionCell.appendChild(returnBtn);
+            }
+        });
+        // 同时更新借阅动态区域 (展示当前未归还记录)
+        updateBorrowNotifyArea();
+    }
+
+    // 管理员借出图书 (简单弹出输入并记录借阅)
+    function markBookBorrow(bookId) {
+        const book = booksInventory.find(b => b.id === bookId);
+        if (!book || !book.available) return;
+        const borrowerName = prompt(`📖 借出《${book.title}》\n请输入读者姓名:`, "王社区");
+        if (!borrowerName) return;
+        const borrowerPhone = prompt("请输入联系电话:", "13800000000");
+        if (!borrowerPhone) return;
+        // 模拟借出
+        book.available = false;
+        book.status = "借出中";
+        const newRecord = {
+            id: "bor_" + Date.now(),
+            bookId: book.id,
+            borrower: borrowerName,
+            phone: borrowerPhone,
+            borrowDate: new Date().toISOString().split('T')[0],
+            dueDate: new Date(Date.now() + 30*86400000).toISOString().split('T')[0],
+            returned: false
+        };
+        borrowRecords.push(newRecord);
+        alert(`✅ 借阅成功！《${book.title}》已借给 ${borrowerName}，应还日期 ${newRecord.dueDate}`);
+        renderBookManagement();
+        updateStatsOverview();
+        // 同步更新前台展示的图书可用性实际上联动前台? 但前后数据已一致。管理员也更新。
+    }
+
+    function markBookReturn(bookId) {
+        const book = booksInventory.find(b => b.id === bookId);
+        if (!book || book.available) return;
+        // 查找未归还记录
+        const activeBorrow = borrowRecords.find(rec => rec.bookId === bookId && !rec.returned);
+        if (activeBorrow) {
+            activeBorrow.returned = true;
+        }
+        book.available = true;
+        book.status = "可借";
+        alert(`📚 《${book.title}》已成功归还，库存恢复可借状态。`);
+        renderBookManagement();
+        updateStatsOverview();
+        updateBorrowNotifyArea();
+    }
+
+    function updateBorrowNotifyArea() {
+        const activeBorrows = borrowRecords.filter(rec => !rec.returned);
+        const container = document.getElementById('borrowNotifyArea');
+        if (activeBorrows.length === 0) {
+            container.innerHTML = `<div style="background:#eef4ea; border-radius: 20px; padding: 12px;"><i class="fas fa-check-circle"></i> 当前无未归还图书，借阅记录良好！</div>`;
+            return;
+        }
+        let html = `<div style="background:#f9f4e6; border-radius: 20px; padding: 8px 12px;"><ul style="list-style:none;">`;
+        activeBorrows.forEach(bor => {
+            const book = booksInventory.find(b => b.id === bor.bookId);
+            const bookTitle = book ? book.title : "未知图书";
+            html += `<li style="margin-bottom: 8px; font-size:0.8rem;"><i class="fas fa-user"></i> <strong>${bor.borrower}</strong> 借阅《${bookTitle}》 应还:${bor.dueDate} 
+            <span style="background:#efe3cf; border-radius:20px; padding:0 6px;">未还</span></li>`;
+        });
+        html += `</ul><div class="text-right mt-1"><i class="fas fa-bell"></i> 请管理员提醒读者及时归还</div></div>`;
+        container.innerHTML = html;
+    }
+
+    // 活动室预约管理 -------------------------------------------------
+    function renderAppointmentManagement() {
+        const container = document.getElementById('appointmentListContainer');
+        if (!container) return;
+        if (adminAppointments.length === 0) {
+            container.innerHTML = `<div class="empty-placeholder"><i class="fas fa-calendar-times"></i> 暂无任何预约记录</div>`;
+            document.getElementById('apptCountBadge').innerText = `0条`;
+            updateStatsOverview();
+            updateSlotChart();
+            return;
+        }
+        let html = '';
+        adminAppointments.forEach((apt, idx) => {
+            const statusStyle = apt.status === '已确认' ? '#e0f0e8' : '#ffe8cf';
+            const statusColor = apt.status === '已确认' ? '#2b6e4f' : '#bd6a1e';
+            html += `
+                <div class="appoint-item" data-id="${apt.id}">
+                    <div class="appoint-header">
+                        <span class="appoint-date"><i class="fas fa-calendar-alt"></i> ${apt.date} ${apt.timeSlot}</span>
+                        <span style="background:${statusStyle}; color:${statusColor}; border-radius: 30px; padding:0 8px; font-size:0.7rem;">${apt.status}</span>
+                    </div>
+                    <div class="appoint-info"><i class="fas fa-user-circle"></i> ${escapeHtml(apt.name)} ｜ 📞 ${escapeHtml(apt.phone)}</div>
+                    <div class="appoint-actions">
+                        ${apt.status === '待确认' ? `<button class="btn-sm confirm-appt" data-id="${apt.id}"><i class="fas fa-check"></i> 确认</button>` : ''}
+                        <button class="btn-sm btn-danger-sm delete-appt" data-id="${apt.id}"><i class="fas fa-trash"></i> 删除</button>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+        // 绑定按钮事件
+        document.querySelectorAll('.confirm-appt').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.getAttribute('data-id');
+                confirmAppointment(id);
+            });
+        });
+        document.querySelectorAll('.delete-appt').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = btn.getAttribute('data-id');
+                deleteAppointment(id);
+            });
+        });
+        document.getElementById('apptCountBadge').innerText = `${adminAppointments.length}条`;
+        updateStatsOverview();
+        updateSlotChart();
+    }
+
+    function confirmAppointment(id) {
+        const appointment = adminAppointments.find(a => a.id === id);
+        if (appointment && appointment.status === '待确认') {
+            appointment.status = '已确认';
+            renderAppointmentManagement();
+            alert(`✅ 已确认 ${appointment.name} 的预约 (${appointment.date} ${appointment.timeSlot})`);
+        } else {
+            alert('预约状态异常或已完成确认');
+        }
+    }
+    function deleteAppointment(id) {
+        if (confirm('确定要删除该条预约记录吗？')) {
+            adminAppointments = adminAppointments.filter(a => a.id !== id);
+            renderAppointmentManagement();
+            alert('已删除预约');
+        }
+    }
+    // 批量清除所有预约 (管理员工具)
+    document.getElementById('clearDemoAppointmentsBtn')?.addEventListener('click', () => {
+        if (confirm('⚠️ 此操作将清空所有活动室预约记录，不可撤销，是否继续？')) {
+            adminAppointments = [];
+            renderAppointmentManagement();
+            alert('所有预约记录已清空');
+        }
+    });
+
+    // 图表渲染 (时段分布)
+    let slotChartInstance = null;
+    function updateSlotChart() {
+        const ctx = document.getElementById('slotChart').getContext('2d');
+        const slotsCount = {
+            '09:00-12:00': 0,
+            '14:00-17:00': 0,
+            '18:00-21:00': 0
+        };
+        adminAppointments.forEach(apt => {
+            if (apt.timeSlot === '09:00-12:00') slotsCount['09:00-12:00']++;
+            else if (apt.timeSlot === '14:00-17:00') slotsCount['14:00-17:00']++;
+            else if (apt.timeSlot === '18:00-21:00') slotsCount['18:00-21:00']++;
+        });
+        if (slotChartInstance) slotChartInstance.destroy();
+        slotChartInstance = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['上午场 09-12', '下午场 14-17', '晚间场 18-21'],
+                datasets: [{
+                    data: [slotsCount['09:00-12:00'], slotsCount['14:00-17:00'], slotsCount['18:00-21:00']],
+                    backgroundColor: ['#2b6e4f', '#f9c74f', '#577a5e'],
+                    borderWidth: 0,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } }
+            }
+        });
+    }
+
+    // 安全转义
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // 模拟前台新增预约时同步至管理员（因为管理员页面独立，但为了体验让新增数据可以从外部模拟？支持与前台逻辑整合？为了演示更好的协同，
+    // 提供了让管理员手动添加预约的快捷方式（可选的小小添加按钮）。但在demo中已完整展示管理。
+    // 也可支持简单导入一个测试，但为了让管理员系统更完整，增加一个手动添加演示按钮（轻量）。
+    function addDemoIntegration() {
+        // 在右侧顶部添加一个浮动的“模拟预约入库”以便显示前台同步效果
+        const addBtn = document.createElement('button');
+        addBtn.className = 'btn-sm';
+        addBtn.style.marginLeft = '8px';
+        addBtn.innerHTML = '<i class="fas fa-plus"></i> 添加演示预约';
+        addBtn.onclick = () => {
+            const demoName = prompt("申请人姓名", "李阿姨");
+            if(!demoName) return;
+            const newApt = {
+                id: "admin_"+Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                timeSlot: "09:00-12:00",
+                name: demoName,
+                phone: "130****1111",
+                createTime: new Date().toISOString().split('T')[0],
+                status: "待确认"
+            };
+            adminAppointments.push(newApt);
+            renderAppointmentManagement();
+            alert(`已添加 ${demoName} 的预约，请后续确认`);
+        };
+        const headerRight = document.querySelector('.appointments-management .section-head');
+        if(headerRight) headerRight.appendChild(addBtn);
+    }
+    
+    // 同步图书状态与借阅记录 (确保从借阅记录来更新图书可用性初始同步)
+    function syncBookAvailabilityFromBorrowRecords() {
+        // 根据未归还记录同步图书available标志
+        booksInventory.forEach(book => {
+            const isBorrowed = borrowRecords.some(rec => rec.bookId === book.id && !rec.returned);
+            book.available = !isBorrowed;
+            book.status = book.available ? "可借" : "借出中";
+        });
+        renderBookManagement();
+        updateStatsOverview();
+    }
+
+    // 全局重启初始化
+    function initAdminSystem() {
+        syncBookAvailabilityFromBorrowRecords();
+        renderBookManagement();
+        renderAppointmentManagement();
+        updateStatsOverview();
+        updateBorrowNotifyArea();
+        addDemoIntegration();
+    }
+
+    initAdminSystem();
+</script>
+</body>
+</html>
